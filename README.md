@@ -10,56 +10,56 @@
 
 **Tests:** ![Test and Release](https://github.com/hualex/ioBroker.simple-irrigation/workflows/Test%20and%20Release/badge.svg)
 
-## Einfache Bewässerungssteuerung mit Zonen für ioBroker
+## Simple zone-based irrigation control for ioBroker
 
-Dieser Adapter ermöglicht eine flexible, zonenbasierte Steuerung von Gartenbewässerungs-Ventilen. Die Konfiguration verbindet die physische Hardware (z.B. Funk-Relais, Zigbee- oder Homematic-Aktoren) mit virtuellen Steuerungs-Datenpunkten, die sich perfekt in jede VIS einbinden lassen.
+This adapter enables flexible, zone-based control of garden irrigation valves. The configuration connects physical hardware (e.g., wireless relays, Zigbee, or Homematic actuators) with virtual control data points, making it perfectly suited for integration into any VIS visualization.
 
-### Kernfeatures
-* **Echtzeit-Anpassung:** Beregnungsdauer und Durchflussmengen können im laufenden Betrieb ohne Adapter-Neustart direkt über ioBroker-Objekte verändert werden.
-* **Integrierter Hardwareschutz (Not-Aus):** Bei jedem Neustart des Adapters oder nach einem Stromausfall werden alle konfigurierten Hardware-Ventile sowie das optionale Hauptventil (Master-Valve) automatisch geschlossen.
-* **Verbrauchsrechner:** Automatische Erfassung des Wasserverbrauchs pro Minute, pro Gießvorgang und pro Woche.
-* **Automatischer Timer** Vollwertige Zeitsteuerung via Cron-Job basierend auf frei wählbaren Wochentagen.
-* **History-Log:** Integrierte Ereignis-Historie für die letzten 20 Aktionen im System, optimiert als kompaktes JSON für Visualisierungen.
-* **Manueller Zonenstart** Jede Zone kann individuell auch außerhalb der automatischen Gießkette gesteuert werden 
-* **optionales Hauptventil** Unterstützung eines Hauptventiles und Stellzeit
-* **optionaler Regensensor** Unterstützung eines Regensensors zum Unterbrechung temporären Aussetzen der Gießkette
-* **Gießketten-Pause** Pausefunktion der Gießkette (z.B., wenn eine Druckerhöhung mit Zwischenpuffer im Einsatz ist und der Puffer leer läuft, kann zum Wiederbefüllen des Puffers die Pausefunktion genutzt werden)
+### Core Features
+* **Real-time Adjustment:** Irrigation duration and flow rates can be modified on the fly via ioBroker objects without requiring an adapter restart.
+* **Integrated Hardware Protection (Emergency Stop):** On every adapter restart or following a power failure, all configured hardware valves as well as the optional master valve are automatically closed.
+* **Consumption Calculator:** Automated tracking of water consumption per minute, per irrigation cycle, and per week.
+* **Automatic Timer:** Full-featured schedule control via cron job based on freely selectable days of the week.
+* **History Log:** Integrated event history storing the last 20 system actions, optimized as a compact JSON string for visualizations.
+* **Manual Zone Start:** Each zone can be controlled individually outside of the automatic irrigation sequence.
+* **Optional Master Valve:** Support for a main valve including valve operating/travel time configuration.
+* **Optional Rain Sensor:** Rain sensor support to temporarily interrupt or skip the irrigation sequence.
+* **Irrigation Sequence Pause:** Pause function for the active irrigation sequence (e.g., if a booster pump with an intermediate buffer tank is used and the tank runs empty, this pause function can be utilized while the tank refills).
 
 ---
 
-## Bedienung & Datenpunkte (VIS-Integration)
+## Operation & Data Points (VIS Integration)
 
-Da die Steuerung autark über die ioBroker-Objekte läuft, können folgende States direkt in der VIS beschrieben und gelesen werden:
+Since the control system runs autonomously via ioBroker objects, the following states can be read and written directly within your VIS visualization:
 
-### Globale Steuerung (`autoTimer.*`)
-* `autoTimer.enabled`: Aktiviert oder deaktiviert den automatischen Zeitplan.
-* `autoTimer.abort`: Ein Button, um eine laufende Bewässerung sofort vollständig abzubrechen.
-* `autoTimer.isPaused`: Pausiert die aktuelle Beregnung (z.B. bei leerer Zisterne oder leerem Druckerhöhungspuffer ).
-* `autoTimer.startMinute`: Startzeit (Minute) der Automatikfunktion
-* `autoTimer.startHour`: Startzeit (Stunde) der Automatikfunktion
-* `autoTimer.days.monday ... sunday`: aktive Wochentage der Automatikfunktion
+### Global Control (`autoTimer.*`)
+* `autoTimer.enabled`: Activates or deactivates the automatic schedule.
+* `autoTimer.abort`: A button to immediately and completely cancel an active irrigation cycle.
+* `autoTimer.isPaused`: Pauses the current irrigation cycle (e.g., in case of an empty cistern or an empty booster pump buffer tank).
+* `autoTimer.startMinute`: Start time (minute) of the automatic function.
+* `autoTimer.startHour`: Start time (hour) of the automatic function.
+* `autoTimer.days.monday ... sunday`: Active weekdays for the automatic function.
 
-### Ereignisprotokoll (`history.log`)
-* `history.log`: die letzten 20 Ereignisse der Steuerung
+### Event Log (`history.log`)
+* `history.log`: Stores the last 20 events of the control system.
 
-### Zonen-Steuerung (`zone_X_*`)
-Jede konfigurierte Zone erhält einen eigenen Ordner im Objektbaum:
-* `zone_X.duration`: Die gewünschte Beregnungsdauer in Minuten (Standard: `15`).
-* `zone_X.litersPerMin`: Der Wasserverbrauch pro Minute zur exakten Volumenberechnung (Standard: `10`).
-* `zone_X.active`: Schaltet die Zone manuell ein (`true`) oder aus (`false`).
-* `zone_X.enabled`: aktiviert /deaktiviert die betreffende Zone (`true`) oder (`false`).
-* `zone_X.remainingSeconds`: Zeigt live die Restlaufzeit der aktuellen Zone an.
+### Zone Control (`zone_X_*`)
+Each configured zone receives its own folder in the object tree:
+* `zone_X.duration`: The desired irrigation duration in minutes (Default: `15`).
+* `zone_X.litersPerMin`: The water consumption per minute for precise volume calculation (Default: `10`).
+* `zone_X.active`: Switches the zone manually on (`true`) or off (`false`).
+* `zone_X.enabled`: Enables or disables the respective zone (`true` or `false`).
+* `zone_X.remainingSeconds`: Displays the live remaining runtime of the current zone.
 
-### Regensensor (optional) (`rainSensor.*`)
-falls ein (optionaler) Regensensor angegeben ist werden folgende Objekte angelegt:
-* `rainSensor.use`: Regensensor in der Gießkette berücksichtigen (Standard: `true`)
-* `rainSensor.invert`: Regensensor-Logik umkehren (Standard: `false`)
-* `rainSensor.isBypassedByRain`: nur lesbar, by `true` wird die Gießkette nicht ausgeführt oder unterbrochen
+### Rain Sensor (optional) (`rainSensor.*`)
+If an optional rain sensor is configured, the following objects are created:
+* `rainSensor.use`: Include the rain sensor in the irrigation sequence (Default: `true`).
+* `rainSensor.invert`: Invert the rain sensor logic (Default: `false`).
+* `rainSensor.isBypassedByRain`: Read-only; if `true`, the irrigation sequence will not be executed or will be interrupted.
 
-### Hauptventil (optional) (`MasterValve.*`)
-falls ein (optionales) Hauptwasserventil angegeben ist werden folgende Objekte angelegt:
-* `masterValve.state`: aktueller Zustand des Hauptventiles, kann auch direkt gesteuert werden
-* `masterValve.isMoving`: falls in der Adapterkonfiguraton eine Ventil-Stellzeit angegeben wird, wird diese berücksichtigt und über das Objekt angezeigt
+### Master Valve (optional) (`masterValve.*`)
+If an optional main water valve is configured, the following objects are created:
+* `masterValve.state`: Current state of the master valve; can also be controlled directly.
+* `masterValve.isMoving`: If a valve operating/travel delay time is specified in the adapter settings, it will be considered and indicated via this object.
 
 ---
 
@@ -67,7 +67,7 @@ falls ein (optionales) Hauptwasserventil angegeben ist werden folgende Objekte a
 
 ### 0.0.1 (2026-07-08)
 * (hualex) initial release
-* (hualex) optimized object structure for neustart-free VIS live updates
+* (hualex) optimized object structure for restart-free VIS live updates
 * (hualex) added automatic hardware safety loop on startup (fail-safe protection)
 * (hualex) limited history log to 20 datasets for database performance
 
