@@ -1,6 +1,5 @@
 {
     "common": {
-        "main": "build/main.js",
         "name": "simple-irrigation",
         "version": "0.0.1",
         "news": {
@@ -63,8 +62,8 @@
         "platform": "Javascript/Node.js",
         "icon": "simple-irrigation.png",
         "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/hualex/ioBroker.simple-irrigation/main/admin/simple-irrigation.png",
-        "readme": "https://github.com/hualex/ioBroker.simple-irrigation/blob/main/README.md",
+        "extIcon": "https://raw.githubusercontent.com/hualex70/ioBroker.simple-irrigation/main/admin/simple-irrigation.png",
+        "readme": "https://github.com/hualex70/ioBroker.simple-irrigation/blob/main/README.md",
         "loglevel": "info",
         "tier": 3,
         "mode": "daemon",

@@ -3,20 +3,21 @@
   "version": "0.0.1",
   "description": "Bewässerungssteuerung mit Zonen",
   "author": {
-    "name": "hualex",
+    "name": "hualex70",
     "email": "alexander.huhn@sprint-net.de"
   },
   "contributors": [],
-  "homepage": "https://github.com/hualex/ioBroker.simple-irrigation",
+  "homepage": "https://github.com/hualex70/ioBroker.simple-irrigation",
   "license": "MIT",
   "keywords": [
+    "ioBroker",
     "Zonen",
     "Bewässerung",
     "Garten"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/hualex/ioBroker.simple-irrigation.git"
+    "url": "https://github.com/hualex70/ioBroker.simple-irrigation.git"
   },
   "engines": {
     "node": ">= 22"
@@ -34,7 +35,7 @@
     "@iobroker/dev-server": "^0.8.0",
     "@iobroker/testing": "^5.2.2",
     "@tsconfig/node22": "^22.0.5",
-    "@types/iobroker": "npm:@iobroker/types@^7.2.2",
+    "@iobroker/types": "^7.2.2",
     "@types/node": "^22.20.0",
     "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2",
@@ -62,7 +63,7 @@
     "watch": "tsc -p tsconfig.json --watch"
   },
   "bugs": {
-    "url": "https://github.com/hualex/ioBroker.simple-irrigation/issues"
+    "url": "https://github.com/hualex70/ioBroker.simple-irrigation/issues"
   },
   "readmeFilename": "README.md"
 }
