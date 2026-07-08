@@ -1,0 +1,175 @@
+{
+    "i18n": true,
+    "type": "tabs",
+    "items": {
+        "tabMain": {
+            "label": {
+                "en": "Zone Configuration",
+                "de": "Zonen-Konfiguration",
+                "ru": "Конфигурация зон",
+                "pt": "Configuração de Zona",
+                "nl": "Zone Configuratie",
+                "fr": "Configuration de la zone",
+                "it": "Configurazione della zona",
+                "es": "Configuración de zona",
+                "pl": "Konfiguracja strefy",
+                "uk": "Конфігурація зон",
+                "zh-cn": "区域配置"
+            },
+            "type": "panel",
+            "items": {
+                "useMasterValve": {
+                    "type": "checkbox",
+                    "label": {
+                        "en": "Use main valve (master valve)",
+                        "de": "Hauptventil (Master-Ventil) verwenden",
+                        "ru": "Использовать главный клапан (мастер-клапан)",
+                        "pt": "Utilizar válvula principal (válvula master)",
+                        "nl": "Hoofdklep (masterklep) gebruiken",
+                        "fr": "Utiliser la vanne principale (maître)",
+                        "it": "Utilizzare la valvola principale (master)",
+                        "es": "Utilizar válvula principal (válvula maestra)",
+                        "pl": "Użyj zaworu głównego (zawór master)",
+                        "uk": "Використовувати головний клапан (майстер-клапан)",
+                        "zh-cn": "使用主阀（母阀）"
+                    },
+                    "xs": 12,
+                    "sm": 12
+                },
+                "masterValveStateId": {
+                    "type": "objectId",
+                    "label": {
+                        "en": "Master valve object (e.g. MQTT, Zigbee...)",
+                        "de": "Hauptventil Objekt (z.B. MQTT, Zigbee...)",
+                        "ru": "Объект главного клапана (например, MQTT, Zigbee...)",
+                        "pt": "Objeto da válvula principal (por exemplo, MQTT, Zigbee...)",
+                        "nl": "Hoofdklep object (bijv. MQTT, Zigbee...)",
+                        "fr": "Objet vanne principale (par ex. MQTT, Zigbee...)",
+                        "it": "Oggetto valvola principale (es. MQTT, Zigbee...)",
+                        "es": "Objeto de válvula principal (por ejemplo, MQTT, Zigbee...)",
+                        "pl": "Obiekt zaworu głównego (np. MQTT, Zigbee...)",
+                        "uk": "Об'єкт головного клапана (наприклад, MQTT, Zigbee...)",
+                        "zh-cn": "主阀 object (例如 MQTT, Zigbee...)"
+                    },
+                    "xs": 12,
+                    "sm": 6,
+                    "hidden": "!data.useMasterValve"
+                },
+                "masterValveDelay": {
+                    "type": "number",
+                    "label": {
+                        "en": "Pre-run delay (0-60 seconds)",
+                        "de": "Vorlauf-Wartezeit (0-60 Sekunden)",
+                        "ru": "Время ожидания перед запуском (0-60 секунд)",
+                        "pt": "Tempo de espera pré-corrida (0-60 segundos)",
+                        "nl": "Voorlooptijd (0-60 seconden)",
+                        "fr": "Temps d'attente avant démarrage (0-60 secondes)",
+                        "it": "Tempo di attesa pre-corsa (0-60 secondi)",
+                        "es": "Tiempo de espera antes de la puesta en marcha (0-60 segundos)",
+                        "pl": "Czas oczekiwania przed uruchomieniem (0-60 sekund)",
+                        "uk": "Час очікування перед запуском (0-60 секунд)",
+                        "zh-cn": "运行前等待时间 (0-60 秒)"
+                    },
+                    "min": 0,
+                    "max": 60,
+                    "xs": 12,
+                    "sm": 6,
+                    "hidden": "!data.useMasterValve"
+                },
+                "useRainSensor": {
+                    "type": "checkbox",
+                    "label": {
+                        "en": "Use rain sensor",
+                        "de": "Regensensor verwenden",
+                        "ru": "Использовать датчик дождя",
+                        "pt": "Utilizar sensor de chuva",
+                        "nl": "Regensensor gebruiken",
+                        "fr": "Utiliser le capteur de pluie",
+                        "it": "Utilizzare il sensore pioxia",
+                        "es": "Utilizar sensor de lluvia",
+                        "pl": "Użyj czujnika deszczu",
+                        "uk": "Використовувати датчик дощу",
+                        "zh-cn": "使用雨水传感器"
+                    },
+                    "xs": 12,
+                    "sm": 12
+                },
+                "rainSensorStateId": {
+                    "type": "objectId",
+                    "label": {
+                        "en": "Rain sensor object (True-False)",
+                        "de": "Regensensor Objekt (True-False)",
+                        "ru": "Объект датчика дождя (True-False)",
+                        "pt": "Objeto do sensor de chuva (True-False)",
+                        "nl": "Regensensor object (True-False)",
+                        "fr": "Objet capteur de pluie (True-False)",
+                        "it": "Oggetto sensore pioggia (True-False)",
+                        "es": "Objeto del sensor de lluvia (True-False)",
+                        "pl": "Obiekt czujnika deszczu (True-False)",
+                        "uk": "Об'єкт датчика дощу (True-False)",
+                        "zh-cn": "雨水传感器 object (True-False)"
+                    },
+                    "xs": 12,
+                    "sm": 12,
+                    "hidden": "!data.useRainSensor"
+                },
+                "zones": {
+                    "type": "table",
+                    "label": {
+                        "en": "Manage irrigation zones",
+                        "de": "Bewässerungs-Zonen verwalten",
+                        "ru": "Управление зонами полива",
+                        "pt": "Gerenciar zonas de irrigação",
+                        "nl": "Irrigatiezones beheren",
+                        "fr": "Gérer les zones d'irrigation",
+                        "it": "Gestire le zone di irrigazione",
+                        "es": "Gestionar zonas de riego",
+                        "pl": "Zarządzaj strefami nawadniania",
+                        "uk": "Управління зонами поливу",
+                        "zh-cn": "管理灌溉区域"
+                    },
+                    "noDelete": false,
+                    "items": [
+                        {
+                            "type": "text",
+                            "attr": "zoneName",
+                            "title": {
+                                "en": "Zone name",
+                                "de": "Name der Zone",
+                                "ru": "Название зоны",
+                                "pt": "Nome da zona",
+                                "nl": "Zonenaam",
+                                "fr": "Nom de la zone",
+                                "it": "Nome della zona",
+                                "es": "Nombre de la zona",
+                                "pl": "Nazwa strefy",
+                                "uk": "Назва зони",
+                                "zh-cn": "区域名称"
+                            },
+                            "width": "45%"
+                        },
+                        {
+                            "type": "objectId",
+                            "attr": "valveStateId",
+                            "title": {
+                                "en": "Associated valve (e.g. MQTT, Zigbee...)",
+                                "de": "Zugehöriges Ventil (z.B. MQTT, Zigbee...)",
+                                "ru": "Связанный клапан (например, MQTT, Zigbee...)",
+                                "pt": "Válvula associada (por exemplo, MQTT, Zigbee...)",
+                                "nl": "Bijbehorende klep (bijv. MQTT, Zigbee...)",
+                                "fr": "Vanne associée (par ex. MQTT, Zigbee...)",
+                                "it": "Valvola associata (es. MQTT, Zigbee...)",
+                                "es": "Válvula asociada (por ejemplo, MQTT, Zigbee...)",
+                                "pl": "Powiązany zawór (np. MQTT, Zigbee...)",
+                                "uk": "Пов'язаний клапан (наприклад, MQTT, Zigbee...)",
+                                "zh-cn": "相关阀门 (例如 MQTT, Zigbee...)"
+                            },
+                            "width": "55%"
+                        }
+                     
+                    ]
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,106 @@
+{
+    "common": {
+        "main": "build/main.js",
+        "name": "simple-irrigation",
+        "version": "0.0.1",
+        "news": {
+            "0.0.1": {
+                "en": "initial release",
+                "de": "Erstveröffentlichung",
+                "ru": "Начальная версия",
+                "pt": "lançamento inicial",
+                "nl": "Eerste uitgave",
+                "fr": "Première version",
+                "it": "Versione iniziale",
+                "es": "Versión inicial",
+                "pl": "Pierwsze wydanie",
+                "uk": "Початкова версія",
+                "zh-cn": "首次出版"
+            }
+        },
+        "titleLang": {
+            "en": "Bewässerung",
+            "de": "Bewässerung",
+            "ru": "Bewässerung",
+            "pt": "Bewässerung",
+            "nl": "Bewässerung",
+            "fr": "Bewässerung",
+            "it": "Versione iniziale",
+            "es": "Bewässerung",
+            "pl": "Bewässerung",
+            "uk": "Bewässerung",
+            "zh-cn": "目的"
+        },
+        "desc": {
+            "en": "Bewässerungssteuerung mit Zonen",
+            "de": "Bewässerungssteuerung mit Zonen",
+            "ru": "Bewässerungssteuerung mit Zonen",
+            "pt": "Bewässerungssteuerung mit Zonen",
+            "nl": "Bewässerungssteuerung met zonen",
+            "fr": "Bewässerungssteuerung mit Zonen",
+            "it": "Bewässerungssteuerung mit Zonen",
+            "es": "Bewässerungssteuerung mit Zonen",
+            "pl": "Bewässerungssteuerung mit Zonen",
+            "uk": "Bewässerungssteuerung mit Zonen",
+            "zh-cn": "区域内的管理"
+        },
+        "authors": [
+            "hualex <alexander.huhn@sprint-net.de>"
+        ],
+        "keywords": [
+            "Zonen",
+            "Bewässerung",
+            "Garten",
+            "Irrigation",
+            "Wasser",
+            "Ventile"
+        
+        ],
+        "licenseInformation": {
+            "type": "free",
+            "license": "MIT"
+        },
+        "platform": "Javascript/Node.js",
+        "icon": "simple-irrigation.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/hualex/ioBroker.simple-irrigation/main/admin/simple-irrigation.png",
+        "readme": "https://github.com/hualex/ioBroker.simple-irrigation/blob/main/README.md",
+        "loglevel": "info",
+        "tier": 3,
+        "mode": "daemon",
+        "type": "garden",
+        "compact": true,
+        "connectionType": "local",
+        "dataSource": "poll",
+        "adminUI": {
+            "config": "json"
+        },
+        "dependencies": [
+            {
+                "js-controller": ">=6.0.11"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=7.0.23"
+            }
+        ]
+    },
+"native": {
+        "useMasterValve": false,
+        "masterValveStateId": "",
+        "masterValveDelay": 0,
+        "useRainSensor": false,
+        "rainSensorStateId": "",
+        "zones": [
+            {
+                "zoneName": "Zone 1",
+                "valveStateId": "",
+                "duration": 15,
+                "litersPerMin": 10
+            }
+        ]
+    },
+    "objects": [],
+    "instanceObjects": []
+}
