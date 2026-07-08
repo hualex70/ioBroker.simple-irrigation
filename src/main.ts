@@ -54,10 +54,8 @@ class SimpleIrrigation extends utils.Adapter {
             }
 
             // Hauptventil (Master Valve) explizit schließen
-            await this.setState('masterValve.state', false, true);
-            if (this.config.useMasterValve && this.config.masterValveStateId) {
-                this.log.info(`Sicherheits-Aus: Schließbefehl an Hauptventil (${this.config.masterValveStateId})`);
-                await this.setForeignStateAsync(this.config.masterValveStateId, false);
+            if (this.config.useMasterValve) {
+            await this.setMasterValve(false);
             }
             this.log.info('Sicherheits-Check erfolgreich beendet. Alle Ventile geschlossen.');
 
@@ -231,10 +229,10 @@ class SimpleIrrigation extends utils.Adapter {
         
         // Ermöglicht die manuelle Direktsteuerung des Hauptventils durch den User (z.B. VIS-Button)
         if (id.endsWith('masterValve.state')) {
-            // Falls das ack: true ist (also vom Adapter), ignorieren, um Endlosschleifen zu vermeiden
+            // falls das ack: true ist (also vom Adapter), ignorieren, um Endlosschleifen zu vermeiden
             if (state.ack) return; 
             this.log.info(`Manueller Steuerbefehl für Hauptventil empfangen: ${state.val}`);
-            // Startet das Öffnen/Schließen asynchron im Hintergrund
+            // startet das Öffnen/Schließen asynchron im Hintergrund
             this.setMasterValve(!!state.val);
             return;
         }
@@ -534,11 +532,7 @@ class SimpleIrrigation extends utils.Adapter {
         }
 
     // Hauptventil Not-Aus
-    if (this.config.useMasterValve && this.config.masterValveStateId) {
-        await this.setForeignState(this.config.masterValveStateId, false, false);
-        await this.setState('masterValve.state', false, true);
-        await this.setState('masterValve.isMoving', false, true);
-    }
+    await this.setMasterValve(false);
     
     await this.setState('autoTimer.isRunning', false, true);
     this.activeZoneIndex = -1;
