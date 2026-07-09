@@ -9,7 +9,7 @@ updates:
       timezone: "Europe/Berlin"
     cooldown:
       default: 7
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 15
     assignees:
       - hualex70
     versioning-strategy: "increase"
@@ -26,6 +26,6 @@ updates:
       timezone: "Europe/Berlin"
     cooldown:
       default: 7
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 15
     assignees:
       - hualex70
