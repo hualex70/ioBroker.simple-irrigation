@@ -4,11 +4,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: 7
+      day: "sunday" # Korrigiert: Wochentag als Text
       time: "00:05"
       timezone: "Europe/Berlin"
-    cooldown:
-      default: 7
     open-pull-requests-limit: 15
     assignees:
       - hualex70
@@ -21,11 +19,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: 7
+      day: "sunday" # Korrigiert: Wochentag als Text
       time: "00:05"
       timezone: "Europe/Berlin"
-    cooldown:
-      default: 7
     open-pull-requests-limit: 15
     assignees:
       - hualex70
