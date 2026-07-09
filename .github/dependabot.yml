@@ -14,7 +14,7 @@ updates:
       - hualex70
     versioning-strategy: "increase"
     ignore:
-      - package-name: "@types/node"
+      - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
