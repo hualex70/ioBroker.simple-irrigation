@@ -65,11 +65,17 @@ If an optional main water valve is configured, the following objects are created
 
 ## Changelog
 
+
+### 1.0.0 (2026-07-09)
+* (hualex70) official release
+* (hualex70) some minor bugfixes 
+
+
 ### 0.0.1 (2026-07-08)
-* (hualex) initial release
-* (hualex) optimized object structure for restart-free VIS live updates
-* (hualex) added automatic hardware safety loop on startup (fail-safe protection)
-* (hualex) limited history log to 20 datasets for database performance
+* (hualex70) initial release
+* (hualex70) optimized object structure for restart-free VIS live updates
+* (hualex70) added automatic hardware safety loop on startup (fail-safe protection)
+* (hualex70) limited history log to 20 datasets for database performance
 
 ---
 
