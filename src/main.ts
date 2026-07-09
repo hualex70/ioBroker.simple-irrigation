@@ -55,7 +55,7 @@ class SimpleIrrigation extends utils.Adapter {
 
             // Hauptventil (Master Valve) explizit schließen
             if (this.config.useMasterValve) {
-            await this.setMasterValve(false);
+                await this.setMasterValve(false);
             }
             this.log.info('Sicherheits-Check erfolgreich beendet. Alle Ventile geschlossen.');
 
@@ -100,11 +100,11 @@ class SimpleIrrigation extends utils.Adapter {
         await this.setObjectNotExistsAsync('autoTimer.startHour', { type: 'state', common: { name: 'Start Stunde', type: 'number', role: 'value.datetime', min: 0, max: 23, read: true, write: true, def: 6 }, native: {} });
         await this.setObjectNotExistsAsync('autoTimer.startMinute', { type: 'state', common: { name: 'Start Minute', type: 'number', role: 'value.datetime', min: 0, max: 59, read: true, write: true, def: 0 }, native: {} });
         await this.setObjectNotExistsAsync('autoTimer.totalLitersCurrentCycle', { type: 'state', common: { name: 'Verbrauch aktueller/letzter Gießzyklus', type: 'number', role: 'value', unit: 'l', read: true, write: false, def: 0 }, native: {} });
-        await this.setObjectNotExistsAsync('autoTimer.litersThisWeek', { type: 'state', common: { name: 'Verbrauch diese Woche gesamt', type: 'number', role: 'value', unit: 'l', read: true, write: false, def: 0 }, native: {} });
+        await this.setObjectNotExistsAsync('autoTimer.litersThisWeek', { type: 'state', common: { name: 'Verbrauch diese Woche gesamt', type: 'number', role: 'value', unit: 'l', read: true, write: true, def: 0 }, native: {} });
         
-        // --- Zisternen-Pause (Visuelle Rückmeldung) ---
-        await this.setObjectNotExistsAsync('autoTimer.isPausedVisual', { type: 'state', common: { name: 'Blink-Status bei Zisternen-Pause', type: 'boolean', role: 'value.status', read: true, write: false, def: false }, native: {} });
-        
+        // --- maximale Pausenzeit ---
+        await this.setObjectNotExistsAsync('autoTimer.maxPauseDuration', { type: 'state', common: { name: 'Maximale Pausendauer bis automatischem Abbruch (Minuten)', type: 'number', role: 'value', unit: 'min', read: true, write: true, def: 30 }, native: {} });
+
         // --- History ---
         await this.setObjectNotExistsAsync('history.log', { type: 'state', common: { name: 'Logbuch der letzten Ereignisse', type: 'string', role: 'json', read: true, write: false, def: '[]' }, native: {} });
         
@@ -169,7 +169,7 @@ class SimpleIrrigation extends utils.Adapter {
         this.log.info('Alle Objekte erfolgreich initialisiert!');
     }
 
-        // Wird aufgerufen, wenn der Adapter beendet wird (z.B. bei Updates oder Deaktivierung).
+    // Wird aufgerufen, wenn der Adapter beendet wird (z.B. bei Updates oder Deaktivierung).
     private async onUnload(callback: () => void): Promise<void> {
         try {
             this.isAborted = true; // Bricht alle aktiven while-Schleifen in derselben Sekunde ab
@@ -191,6 +191,7 @@ class SimpleIrrigation extends utils.Adapter {
             if (id.endsWith('.abort') && state.val === true) {
                 this.log.warn('Bewässerung wurde vom Nutzer vorzeitig ABGEBROCHEN!');
                 await this.stopAllValves();
+                await this.writeToHistory('Bewässerung manuell abgebrochen (Not-Aus)!');
                 await this.setState('autoTimer.abort', false, true );
                 return;
             }
@@ -203,7 +204,6 @@ class SimpleIrrigation extends utils.Adapter {
         // Verarbeitung von Regensensor-Einstellungen (Bypass / Invertierung)
         if (id.includes('rainSensor.')) {
             this.log.info(`Regensensor-Einstellung geändert: ${id} -> ${state.val}`);
-            // quittieren der Änderung des Nutzers direkt, damit die gelbe Farbe im ioBroker verschwindet
             await this.setState(id, state.val, true);
             return;
         }
@@ -214,13 +214,41 @@ class SimpleIrrigation extends utils.Adapter {
             const zoneFolderId = parts[parts.length - 2]; // Extrahiert z.B. "zone_0_rasen"
             
             if (state.val === true) {
+                // === FIX M1: Gleichzeitiges manuelles Starten blockieren ===
+                // Prüfen, ob die Automatik läuft ODER bereits eine andere Zone manuell aktiv ist
+                const isRunningState = await this.getStateAsync('autoTimer.isRunning');
+                const isAutoRunning = isRunningState ? !!isRunningState.val : false;
+                
+                let anyOtherZoneActive = false;
+                const zonesConfig = this.config.zones as ZoneConfig[] | undefined;
+                if (zonesConfig && Array.isArray(zonesConfig)) {
+                    for (let z = 0; z < zonesConfig.length; z++) {
+                        if (!zonesConfig[z].zoneName) continue;
+                        const sName = zonesConfig[z].zoneName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                        const checkFolderId = `zone_${z}_${sName}`;
+                        
+                        if (checkFolderId !== zoneFolderId) {
+                            const zActive = await this.getStateAsync(`${checkFolderId}.active`);
+                            if (zActive && zActive.val === true) {
+                                anyOtherZoneActive = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (isAutoRunning || anyOtherZoneActive) {
+                    this.log.warn(`[MANUELLER BLOCK] Start von ${zoneFolderId} verweigert. Es läuft bereits eine Bewässerung!`);
+                    await this.setState(id, false, true); // Setze den Button sofort wieder zurück auf false
+                    return;
+                }
+
                 const indexMatch = zoneFolderId.match(/^zone_(\d+)_/);
                 const zoneIndex = indexMatch ? parseInt(indexMatch[1], 10) : -1;
                 const zones = this.config.zones as ZoneConfig[] | undefined;
                 
                 if (zones && Array.isArray(zones) && zoneIndex >= 0 && zones[zoneIndex]) {
                     this.log.info(`[MANUELLER START] Nutzer aktiviert Zone: ${zones[zoneIndex].zoneName}`);
-                    // Startet die asynchrone Einzelschleife für diese Zone
                     this.startSingleZoneManual(zoneFolderId, zones[zoneIndex]);
                 }
                 await this.setState(id, true, true );
@@ -229,16 +257,13 @@ class SimpleIrrigation extends utils.Adapter {
         
         // Ermöglicht die manuelle Direktsteuerung des Hauptventils durch den User (z.B. VIS-Button)
         if (id.endsWith('masterValve.state')) {
-            // falls das ack: true ist (also vom Adapter), ignorieren, um Endlosschleifen zu vermeiden
             if (state.ack) return; 
             this.log.info(`Manueller Steuerbefehl für Hauptventil empfangen: ${state.val}`);
-            // startet das Öffnen/Schließen asynchron im Hintergrund
             this.setMasterValve(!!state.val);
             return;
         }
     }
 
-    
     //  Liest die Gießzeiten und Wochentage aus und baut den Cronjob-String dynamisch zusammen
     private async updateTimer(): Promise<void> {
         const enabledState = await this.getStateAsync('autoTimer.enabled');
@@ -253,31 +278,26 @@ class SimpleIrrigation extends utils.Adapter {
         if ((await this.getStateAsync('autoTimer.days.thursday'))?.val) cronDays.push(4);
         if ((await this.getStateAsync('autoTimer.days.friday'))?.val) cronDays.push(5);
         if ((await this.getStateAsync('autoTimer.days.saturday'))?.val) cronDays.push(6);
-        if ((await this.getStateAsync('autoTimer.days.sunday'))?.val) cronDays.push(0); // 0 = Sonntag im Cron
+        if ((await this.getStateAsync('autoTimer.days.sunday'))?.val) cronDays.push(0);
 
         if (cronDays.length === 0) { 
             this.stopActiveTimer(); 
             return; 
         }
         
-        // Baut z.B. "30 5 * * 1,2,3,4,5" -> Jedes Jahr/Monat, Mo-Fr um 05:30 Uhr
         const cronExpression = `${minute} ${hour} * * ${cronDays.join(',')}`;
         await this.setState('autoTimer.cronExpression', cronExpression, true );
         this.stopActiveTimer();
 
-        // wenn der Timer scharf geschaltet ist, instanziiere den CronJob neu
         if (enabled) {
             this.log.info(`Schalte automatische Bewässerung SCHARF: Jeden [${cronDays.join(',')}] um ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')} Uhr`);
-            // Saubere Instanziierung über die importierte Klasse
             this.activeSchedule = new CronJob(cronExpression, () => { 
-            this.startAutomaticIrrigation(); 
-            }, null, false, 'Europe/Berlin'); // false verhindert den automatischen Sofortstart bei Instanziierung
-            // starten des Jobs explizit und kontrolliert
+                this.startAutomaticIrrigation(); 
+            }, null, false, 'Europe/Berlin');
             this.activeSchedule.start();
         }
     }
     
-    //  stoppt den aktuellen Cron-Zeitplan und räumt den Speicher auf
     private stopActiveTimer(): void {
         if (this.activeSchedule) { 
             this.activeSchedule.stop(); 
@@ -292,40 +312,31 @@ class SimpleIrrigation extends utils.Adapter {
         await this.setState('autoTimer.totalLitersCurrentCycle', 0, true);
         let totalCycleLiters = 0;
         
-        // Wettersensor-Abfrage mit dynamischen Objekten (Bypass & Invertierung)
         if (this.config.useRainSensor && this.config.rainSensorStateId) {
-            // 1. Prüfen, ob der Nutzer den Sensor aktuell überhaupt berücksichtigen will
             const useSensorState = await this.getStateAsync('rainSensor.use');
             const useSensor = useSensorState ? !!useSensorState.val : true;
     
             if (useSensor) {
-                // Hardware-Sensorzustand auslesen
                 const rainState = await this.getForeignStateAsync(this.config.rainSensorStateId);
-                // Invertierungs-Schalter auslesen
                 const invertSensorState = await this.getStateAsync('rainSensor.invert');
                 const invertSensor = invertSensorState ? !!invertSensorState.val : false;
-                // Logik berechnen: Wenn Zustand true ist und NICHT invertiert, ODER Zustand false ist und invertiert -> ES REGNET
                 let isRainingDetected = rainState ? !!rainState.val : false;
-                    if (invertSensor) {
+                if (invertSensor) {
                     isRainingDetected = !isRainingDetected;
-                    }
+                }
 
                 if (isRainingDetected) {
                     this.log.warn('Regensensor meldet Nässe. Automatik-Bewässerung wird übersprungen!');
-                    // Setze die Status-Objekte für den User
                     await this.setState('rainSensor.isBypassedByRain', true, true);
                     await this.setState('autoTimer.isRunning', false, true);
-                    // schreibe in JSON-History-Logbuch
                     await this.writeToHistory('Automatik übersprungen: Regensensor blockiert.');
                     return;
                 }
             }
         }
-        // falls kein Regen erkannt wurde oder der Sensor deaktiviert ist
         await this.setState('rainSensor.isBypassedByRain', false, true);
         await this.setState('autoTimer.isRunning', true, true );
 
-        // Hauptventil automatisch öffnen und Stellzeit abwarten
         await this.setMasterValve(true);
 
         const zones = this.config.zones as ZoneConfig[] | undefined;
@@ -344,85 +355,104 @@ class SimpleIrrigation extends utils.Adapter {
             const safeName = zone.zoneName.toLowerCase().replace(/[^a-z0-9]/g, '_');
             const zoneFolderId = `zone_${i}_${safeName}`;
             
-            // überspringe die Zone, wenn sie für die Automatik deaktiviert wurde
             if (!((await this.getStateAsync(`${zoneFolderId}.enabled`))?.val ?? true)) continue;
 
-            // setze Zeitstempel für den VIS-Verlauf
             const now = new Date();
             await this.setState(`${zoneFolderId}.startTime`, `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`, true );
             await this.setState(`${zoneFolderId}.stopTime`, '--:--', true );
 
-            // lade Solldauer und Durchflusswerte für die Live-Berechnung
             const durationMin = Number((await this.getStateAsync(`${zoneFolderId}.duration`))?.val ?? 15);
             const litersState = await this.getStateAsync(`${zoneFolderId}.litersPerMin`);
             const litersPerMin = litersState && litersState.val !== null && !isNaN(Number(litersState.val)) ? Number(litersState.val) : 10;
 
-            // Aktivierung im ioBroker und Hardware-Ventil öffnen
             await this.setState(`${zoneFolderId}.active`, true, true );
             if (zone.valveStateId) await this.setForeignStateAsync(zone.valveStateId, { val: true, ack: false });
 
             let totalSecondsRemaining = durationMin * 60;
             let actualSecondsWatered = 0;
+            let secondsInPause = 0; 
             let localPausedState = false;
             await this.setState(`${zoneFolderId}.litersPerCycle`, 0, true );
 
-            // lokale Sekundenschleife für Countdown und Literberechnung 
+            const maxPauseMin = Number((await this.getStateAsync('autoTimer.maxPauseDuration'))?.val ?? 30);
+            const maxPauseSeconds = maxPauseMin * 60;
+
             while (totalSecondsRemaining > 0 && !this.isAborted) {
-                // Erlaubt das vorzeitige Ausschalten einer einzelnen Zone während der Automatik
                 const currentActiveState = await this.getStateAsync(`${zoneFolderId}.active`);
                 if (currentActiveState && currentActiveState.val === false) break;
 
-                // Zisternen-Pausenschalter prüfen
                 const pauseCheck = await this.getStateAsync('autoTimer.isPaused');
                 const isPausedNow = pauseCheck ? !!pauseCheck.val : false;
 
-                // pausiert? -> Ventil zu!
                 if (isPausedNow && !localPausedState) {
                     localPausedState = true;
                     if (zone.valveStateId) await this.setForeignStateAsync(zone.valveStateId, { val: false, ack: false });
                 }
-                // Pause aufgehoben? -> Ventil wieder auf!
                 if (!isPausedNow && localPausedState) {
                     localPausedState = false;
                     if (zone.valveStateId) await this.setForeignStateAsync(zone.valveStateId, { val: true, ack: false });
                 }
 
-                // wenn nicht pausiert ist, zähle die Zeit runter und errechne den kumulierten Verbrauch
                 if (!isPausedNow) {
+                    secondsInPause = 0; 
                     await this.setState(`${zoneFolderId}.remainingSeconds`, totalSecondsRemaining, true );
                     totalSecondsRemaining--;
                     actualSecondsWatered++;
                     
-                    // Formel: (Sekunden / 60) * LiterProMinute
                     const liveLiters = Math.round((actualSecondsWatered / 60) * litersPerMin);
                     await this.setState(`${zoneFolderId}.litersPerCycle`, liveLiters, true);
-                    // jede Sekunde den globalen Wert für den aktuellen Zyklus updaten
                     const currentZoneTickLiters = (1 / 60) * litersPerMin;
                     totalCycleLiters += currentZoneTickLiters;
                     await this.setState('autoTimer.totalLitersCurrentCycle', Math.round(totalCycleLiters * 100) / 100, true);
+                } else {
+                    secondsInPause++;
+                    if (secondsInPause >= maxPauseSeconds) {
+                        this.log.warn(`[AUTOMATIK] Maximale Pausendauer von ${maxPauseMin} Minuten überschritten! Breche gesamte Bewässerung ab.`);
+                        await this.writeToHistory(`Abbruch: Pause-Timeout von ${maxPauseMin} Min überschritten.`);
+                        
+                        // === FIX A3: isPaused automatisch wieder auf false setzen ===
+                        await this.setState('autoTimer.isPaused', false, true);
+                        
+                        this.isAborted = true; 
+                        break;
+                    }
                 }
-                await this.sleep(1000); // Pause vor dem nächsten Schleifendurchlauf
+                await this.sleep(1000);
             }
 
-            // nach Beendigung der aktuellen Zone -> aufräumen
+            // nach Beendigung der aktuellen Zone (regulär ODER Abbruch) -> aufräumen
             await this.setState(`${zoneFolderId}.remainingSeconds`, 0, true );
             const end = new Date();
             await this.setState(`${zoneFolderId}.stopTime`, `${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`, true );
             await this.setState(`${zoneFolderId}.active`, false, true );
             if (zone.valveStateId) await this.setForeignStateAsync(zone.valveStateId, { val: false, ack: false });
-        }
-        await this.stopAllValves();
-        await this.setMasterValve(false);
+
+            // === FIX B2: Wenn abgebrochen wurde, breche die Zonenverteilung SOFORT ab ===
+            if (this.isAborted) {
+                this.log.info(`[AUTOMATIK] Schleife wegen vorzeitigem Abbruch bei Zone ${zone.zoneName} beendet.`);
+                break;
+            }
+        } // Ende der äußeren Zonen-Schleife
+        
+        await this.stopAllValves(false);
+        await this.setState('autoTimer.isRunning', false, true);
 
         //Wochenverbrauch aufaddieren
         const currentWeekState = await this.getStateAsync('autoTimer.litersThisWeek');
         const oldWeekLiters = Number(currentWeekState?.val ?? 0);
-        await this.setState('autoTimer.litersThisWeek', Math.round((oldWeekLiters + totalCycleLiters) * 100) / 100, true);
+        const newWeekLiters = Math.round((oldWeekLiters + totalCycleLiters) * 100) / 100;
+        await this.setState('autoTimer.litersThisWeek', newWeekLiters, true);
+
+        // === FIX B1: Logbuch-Eintrag Logik korrigiert ===
+        if (this.isAborted) {
+            await this.writeToHistory('Automatische Bewässerung VORZEITIG ABGEBROCHEN!');
+        } else {
+            const roundedLiters = Math.round(totalCycleLiters * 100) / 100;
+            await this.writeToHistory(`Automatische Bewässerung beendet. Gesamtverbrauch: ${roundedLiters}l`);
+        }
     }
 
-    
     //  Gießschleife für manuellen Individualstart einer einzelnen Zone
-    //  wie Automatikschleife, steuert jedoch isoliert nur eine Zone an.
     private async startSingleZoneManual(zoneFolderId: string, zone: ZoneConfig): Promise<void> {
         this.isAborted = false;
         const now = new Date();
@@ -433,15 +463,18 @@ class SimpleIrrigation extends utils.Adapter {
         const litersState = await this.getStateAsync(`${zoneFolderId}.litersPerMin`);
         const litersPerMin = litersState && litersState.val !== null && !isNaN(Number(litersState.val)) ? Number(litersState.val) : 10;
 
-        // Hauptventil vor dem manuellen Zonenstart öffnen
         await this.setMasterValve(true);
 
         if (zone.valveStateId) await this.setForeignStateAsync(zone.valveStateId, { val: true, ack: false });
 
         let totalSecondsRemaining = durationMin * 60;
         let actualSecondsWatered = 0;
+        let secondsInPause = 0; 
         let localPausedState = false;
         await this.setState(`${zoneFolderId}.litersPerCycle`, 0, true );
+
+        const maxPauseMin = Number((await this.getStateAsync('autoTimer.maxPauseDuration'))?.val ?? 30);
+        const maxPauseSeconds = maxPauseMin * 60;
 
         while (totalSecondsRemaining > 0 && !this.isAborted) {
             const currentActiveState = await this.getStateAsync(`${zoneFolderId}.active`);
@@ -463,58 +496,63 @@ class SimpleIrrigation extends utils.Adapter {
             }
 
             if (!isPausedNow) {
+                secondsInPause = 0; 
                 await this.setState(`${zoneFolderId}.remainingSeconds`, totalSecondsRemaining, true );
                 totalSecondsRemaining--;
                 actualSecondsWatered++;
                 const liveLiters = Math.round((actualSecondsWatered / 60) * litersPerMin * 100) / 100;
                 await this.setState(`${zoneFolderId}.litersPerCycle`, liveLiters, true );
+            } else {
+                secondsInPause++;
+                if (secondsInPause >= maxPauseSeconds) {
+                    this.log.warn(`[MANUELL] Maximale Pausendauer von ${maxPauseMin} Minuten überschritten! Breche Bewässerung ab.`);
+                    await this.writeToHistory(`Abbruch: Pause-Timeout von ${maxPauseMin} Min überschritten.`);
+                    
+                    // === FIX A3: isPaused automatisch wieder auf false setzen ===
+                    await this.setState('autoTimer.isPaused', false, true);
+                    
+                    this.isAborted = true; 
+                    break;
+                }
             }
             await this.sleep(1000);
         }
 
-        this.log.info(`[Zone Beendigung] ${zone.zoneName} nach ${actualSecondsWatered}s.`);
+        this.log.info(`[Zone Beendigung] ${zone.zoneName} nach ${actualSecondsWatered}s aktiver Bewässerung.`);
         await this.setState(`${zoneFolderId}.remainingSeconds`, 0, true );
         const end = new Date();
         await this.setState(`${zoneFolderId}.stopTime`, `${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`, true );
 
         if (zone.valveStateId) await this.setForeignStateAsync(zone.valveStateId, { val: false, ack: false });
         
-        // Hauptventil nach manuellem Zonenstopp wieder schließen
         if (this.config.useMasterValve && this.config.masterValveStateId) {
             await this.setMasterValve(false);
         }
 
-    // aktuellen Stand des Datenpunkts holen, um zu sehen, wie viele Restsekunden
-    const remainingSecondsState = await this.getStateAsync(`${zoneFolderId}.remainingSeconds`);
-    const lastRemainingSeconds = Number(remainingSecondsState?.val ?? 0);
+        if (actualSecondsWatered > 0) {
+            const manualLitersUsed = Math.round((actualSecondsWatered / 60) * litersPerMin * 100) / 100;
 
-    // tatsächlich bewässerte Sekunden berechnen
-    const finalManualSeconds = Math.max(0, durationMin * 60 - lastRemainingSeconds);
-    const manualLitersUsed = Math.round((finalManualSeconds / 60) * litersPerMin * 100) / 100;
-
-    if (manualLitersUsed > 0) {
-    // aktuellen Wochenwert auslesen
-    const currentWeekState = await this.getStateAsync('autoTimer.litersThisWeek');
-    const oldWeekLiters = Number(currentWeekState?.val ?? 0);
-    
-    // aufaddieren und speichern
-    await this.setState('autoTimer.litersThisWeek', Math.round((oldWeekLiters + manualLitersUsed) * 100) / 100, true);
-    
-    // Eintrag ins Logbuch schreiben
-    await this.writeToHistory(`Manuelle Bewässerung: ${zone.zoneName} (${manualLitersUsed}l)`);
-    }
+            if (manualLitersUsed > 0) {
+                const currentWeekState = await this.getStateAsync('autoTimer.litersThisWeek');
+                const oldWeekLiters = Number(currentWeekState?.val ?? 0);
+                await this.setState('autoTimer.litersThisWeek', Math.round((oldWeekLiters + manualLitersUsed) * 100) / 100, true);
+                await this.writeToHistory(`Manuelle Bewässerung: ${zone.zoneName} (${manualLitersUsed}l)`);
+            }
+        }
         
         await this.setState(`${zoneFolderId}.active`, false, true );
     }
 
-    
-    //  Sicherheitsfunktion: Schaltet ausnahmslos alle internen States, echten Hardware-Ventile 
-    //  sowie das Master-Ventil sofort ab und setzt Timer zurück.
-    private async stopAllValves(): Promise<void> {
-        this.isAborted = true;
+    // Sicherheitsfunktion: Schaltet ausnahmslos alle internen States und echten Hardware-Ventile ab.
+    // isEmergency = true bedeutet echter Not-Aus. bei false ist es nur das reguläre Aufräumen am Ende.
+    private async stopAllValves(isEmergency: boolean = true): Promise<void> {
+        if (isEmergency) {
+            this.isAborted = true;
+        }
+        
         if (this.currentTimeout) { 
-        this.clearTimeout(this.currentTimeout); 
-        this.currentTimeout = null; 
+            this.clearTimeout(this.currentTimeout); 
+            this.currentTimeout = null; 
         }
 
         const zones = this.config.zones as ZoneConfig[] | undefined;
@@ -525,20 +563,24 @@ class SimpleIrrigation extends utils.Adapter {
                 const safeName = zone.zoneName.toLowerCase().replace(/[^a-z0-9]/g, '_');
                 const zoneFolderId = `zone_${i}_${safeName}`;
             
+                // Wenn die Zone aktiv war, schreibe vor dem Abschalten die Stop-Time
+                const currentActive = await this.getStateAsync(`${zoneFolderId}.active`);
+                if (currentActive && currentActive.val === true) {
+                    const end = new Date();
+                    await this.setState(`${zoneFolderId}.stopTime`, `${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`, true );
+                }
+
                 await this.setState(`${zoneFolderId}.active`, false, true);
                 await this.setState(`${zoneFolderId}.remainingSeconds`, 0, true);
                 if (zone.valveStateId) await this.setForeignState(zone.valveStateId, false, false);
             }
         }
 
-    // Hauptventil Not-Aus
-    await this.setMasterValve(false);
-    
-    await this.setState('autoTimer.isRunning', false, true);
-    this.activeZoneIndex = -1;
+        await this.setMasterValve(false);
+        await this.setState('autoTimer.isRunning', false, true);
+        this.activeZoneIndex = -1;
     }
     
-    //  Hilfsmethode (Sleep), über das ioBroker-eigene setTimeout, beim Beenden offene Timeouts sauber killen
     private sleep(ms: number): Promise<void> { 
         return new Promise((resolve) => { 
             this.currentTimeout = this.setTimeout(resolve, ms); 
@@ -559,10 +601,8 @@ class SimpleIrrigation extends utils.Adapter {
             }
             
             const now = new Date();
-            // Timestamp - sauberes Format 
             const timestamp = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
             
-            // neues Ereignis vorne anfügen und auf max. 20 Einträge begrenzen
             logArray.unshift({ ts: timestamp, msg: message });
             if (logArray.length > 20) {
                 logArray = logArray.slice(0, 20);
@@ -574,33 +614,26 @@ class SimpleIrrigation extends utils.Adapter {
         }
     }
 
-    //  Hauptventil steuern, setzt Status-States und wartet die konfigurierte Stellzeit ab
-    //  @param open true = öffnen, false = schließen
     private async setMasterValve(open: boolean): Promise<void> {
         if (!this.config.useMasterValve || !this.config.masterValveStateId) return;
 
         this.log.info(`Hauptventil wird angesteuert -> ${open ? 'ÖFFNEN' : 'SCHLIESSEN'}`);
         await this.setState('masterValve.isMoving', true, true);
     
-        // echten Schaltbefehl an die Hardware senden (ack: false)
         await this.setForeignState(this.config.masterValveStateId, open, false);
-        // aktualisiere eigenen internen Status
         await this.setState('masterValve.state', open, true);
 
-        // Stellzeit (Verzögerung) aus der Adapterkonfiguration abwarten
         const runTimeSeconds = this.config.masterValveDelay || 0;
-            if (runTimeSeconds > 0) {
+        if (runTimeSeconds > 0) {
             this.log.info(`Warte ${runTimeSeconds} Sekunden Stellzeit (Kugelhahnlaufzeit) ab...`);
             await this.sleep(runTimeSeconds * 1000);
-            }
+        }
 
-            // Ventil-Bewegung abgeschlossen
-            await this.setState('masterValve.isMoving', false, true);
-            this.log.info(`Hauptventil hat Endlage erreicht (${open ? 'OFFEN' : 'ZU'}).`);
+        await this.setState('masterValve.isMoving', false, true);
+        this.log.info(`Hauptventil hat Endlage erreicht (${open ? 'OFFEN' : 'ZU'}).`);
     }
 }
 
-// Einstiegspunkt js-controller
 if (require.main !== module) {
     module.exports = (options: Partial<utils.AdapterOptions> = {}) => new SimpleIrrigation(options);
 } else { 

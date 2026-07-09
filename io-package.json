@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "simple-irrigation",
-        "version": "0.0.1",
+        "version": "1.0.0",
         "news": {
             "0.0.1": {
                 "en": "initial release",
@@ -18,42 +18,47 @@
             }
         },
         "titleLang": {
-            "en": "Bewässerung",
-            "de": "Bewässerung",
-            "ru": "Bewässerung",
-            "pt": "Bewässerung",
-            "nl": "Bewässerung",
-            "fr": "Bewässerung",
-            "it": "Versione iniziale",
-            "es": "Bewässerung",
-            "pl": "Bewässerung",
-            "uk": "Bewässerung",
-            "zh-cn": "目的"
+            "en": "Simple Irrigation",
+            "de": "Einfache Bewässerung",
+            "ru": "Простой полив",
+            "pt": "Irrigação Simples",
+            "nl": "Eenvoudige irrigatie",
+            "fr": "Irrigation Simple",
+            "it": "Irrigazione Semplice",
+            "es": "Riego Simple",
+            "pl": "Proste nawadnianie",
+            "uk": "Простий полив",
+            "zh-cn": "简易 interpretation 灌溉"
         },
         "desc": {
-            "en": "Bewässerungssteuerung mit Zonen",
-            "de": "Bewässerungssteuerung mit Zonen",
-            "ru": "Bewässerungssteuerung mit Zonen",
-            "pt": "Bewässerungssteuerung mit Zonen",
-            "nl": "Bewässerungssteuerung met zonen",
-            "fr": "Bewässerungssteuerung mit Zonen",
-            "it": "Bewässerungssteuerung mit Zonen",
-            "es": "Bewässerungssteuerung mit Zonen",
-            "pl": "Bewässerungssteuerung mit Zonen",
-            "uk": "Bewässerungssteuerung mit Zonen",
-            "zh-cn": "区域内的管理"
+            "en": "Smart irrigation control system supporting multiple watering zones",
+            "de": "Intelligente Bewässerungssteuerung für mehrere Gießzonen",
+            "ru": "Интеллектуальная система управления поливом с поддержкой нескольких зон",
+            "pt": "Sistema inteligente de controle de irrigação com suporte a múltiplas zonas",
+            "nl": "Slim beregeningsbesturingssysteem met ondersteuning voor meerdere zones",
+            "fr": "Système intelligent de contrôle de l'irrigation pour plusieurs zones",
+            "it": "Sistema di controllo intelligente dell'irrigazione con supporto per più zone",
+            "es": "Sistema de control de riego inteligente compatible con múltiples zonas",
+            "pl": "Inteligentny system sterowania nawadnianiem obsługujący wiele stref",
+            "uk": "Інтелектуальна система керування поливом з підтримкою кількох зон",
+            "zh-cn": "支持多个浇水区域 Exp 智能灌溉控制系统"
         },
         "authors": [
-            "hualex <alexander.huhn@sprint-net.de>"
+            "hualex70 <alexander.huhn@sprint-net.de>"
         ],
         "keywords": [
-            "Zonen",
+            "ioBroker",
+            "irrigation",
+            "watering",
+            "garden",
+            "valves",
+            "zones",
+            "simple",
             "Bewässerung",
             "Garten",
-            "Irrigation",
             "Wasser",
-            "Ventile"
-        
+            "Ventile",
+            "Zonen"
         ],
         "licenseInformation": {
             "type": "free",
