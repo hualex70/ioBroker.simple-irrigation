@@ -34,7 +34,10 @@
                         "zh-cn": "使用主阀（母阀）"
                     },
                     "xs": 12,
-                    "sm": 12
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
                 },
                 "masterValveStateId": {
                     "type": "objectId",
@@ -53,6 +56,9 @@
                     },
                     "xs": 12,
                     "sm": 6,
+                    "md": 6,
+                    "lg": 6,
+                    "xl": 6,
                     "hidden": "!data.useMasterValve"
                 },
                 "masterValveDelay": {
@@ -74,6 +80,9 @@
                     "max": 60,
                     "xs": 12,
                     "sm": 6,
+                    "md": 6,
+                    "lg": 6,
+                    "xl": 6,
                     "hidden": "!data.useMasterValve"
                 },
                 "useRainSensor": {
@@ -92,7 +101,10 @@
                         "zh-cn": "使用雨水传感器"
                     },
                     "xs": 12,
-                    "sm": 12
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
                 },
                 "rainSensorStateId": {
                     "type": "objectId",
@@ -111,6 +123,9 @@
                     },
                     "xs": 12,
                     "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12,
                     "hidden": "!data.useRainSensor"
                 },
                 "zones": {
@@ -128,6 +143,11 @@
                         "uk": "Управління зонами поливу",
                         "zh-cn": "管理灌溉区域"
                     },
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12,
                     "noDelete": false,
                     "items": [
                         {
@@ -166,7 +186,6 @@
                             },
                             "width": "55%"
                         }
-                     
                     ]
                 }
             }

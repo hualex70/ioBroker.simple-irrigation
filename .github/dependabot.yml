@@ -3,22 +3,24 @@ updates:
   - package-ecosystem: npm
     directory: "/"
     schedule:
-      interval: monthly
-      day: 9
+      interval: weekly
+      day: 7
       time: "00:05"
       timezone: Europe/Berlin
+      cooldown: default: 7
     open-pull-requests-limit: 5
     assignees:
-      - hualex
+      - hualex70
     versioning-strategy: increase
 
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: monthly
-      day: 9
+      interval: weekly
+      day: 7
       time: "00:05"
       timezone: Europe/Berlin
+      cooldown: default: 7
     open-pull-requests-limit: 5
     assignees:
-      - hualex
+      - hualex70
