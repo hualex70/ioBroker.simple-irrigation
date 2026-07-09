@@ -26,6 +26,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4 # <-- HIER FEHLTE DAS AUSCHECKEN!
       - uses: ioBroker/testing-action-check@v1
         with:
           node-version: '22.x'
@@ -41,6 +42,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
+      - uses: actions/checkout@v4 # <-- DAZUGEFÜGT, DAMIT DIE TESTS JEDEN ORDNER SEHEN
       - uses: ioBroker/testing-action-adapter@v1
         with:
           node-version: ${{ matrix.node-version }}
