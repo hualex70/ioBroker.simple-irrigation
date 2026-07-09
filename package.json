@@ -50,8 +50,9 @@
     "io-package.json",
     "LICENSE"
   ],
-  "scripts": {
+ "scripts": {
     "check": "tsc --noEmit",
+    "lint": "tsc --noEmit",
     "test:ts": "mocha --config test/mocharc.custom.json src/**/*.test.ts",
     "test:package": "mocha test/package --exit",
     "test:integration": "mocha test/integration --exit",
