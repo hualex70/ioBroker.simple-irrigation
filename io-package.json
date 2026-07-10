@@ -1,108 +1,121 @@
 {
-    "common": {
-        "name": "simple-irrigation",
-        "version": "0.0.1",
-        "news": {
-            "0.0.1": {
-                "en": "initial release",
-                "de": "Erstveröffentlichung",
-                "ru": "Начальная версия",
-                "pt": "lançamento inicial",
-                "nl": "Eerste uitgave",
-                "fr": "Première version",
-                "it": "Versione iniziale",
-                "es": "Versión inicial",
-                "pl": "Pierwsze wydanie",
-                "uk": "Початкова версія",
-                "zh-cn": "首次出版"
-            }
-        },
-        "titleLang": {
-            "en": "simple-irrigation",
-            "de": "simple-irrigation",
-            "ru": "Простой полив",
-            "pt": "Irrigação Simples",
-            "nl": "Eenvoudige irrigatie",
-            "fr": "Irrigation Simple",
-            "it": "Irrigazione Semplice",
-            "es": "Riego Simple",
-            "pl": "Proste nawadnianie",
-            "uk": "Простий полив",
-            "zh-cn": "简易 interpretation 灌溉"
-        },
-        "desc": {
-            "en": "Smart irrigation control system supporting multiple watering zones",
-            "de": "Intelligente Bewässerungssteuerung für mehrere Gießzonen",
-            "ru": "Интеллектуальная система управления поливом с поддержкой нескольких зон",
-            "pt": "Sistema inteligente de controle de irrigação com suporte a múltiplas zonas",
-            "nl": "Slim beregeningsbesturingssysteem met ondersteuning voor meerdere zones",
-            "fr": "Système intelligent de contrôle de l'irrigation pour plusieurs zones",
-            "it": "Sistema di controllo intelligente dell'irrigazione con supporto per più zone",
-            "es": "Sistema de control de riego inteligente compatible con múltiples zonas",
-            "pl": "Inteligentny system sterowania nawadnianiem obsługujący wiele stref",
-            "uk": "Інтелектуальна система керування поливом з підтримкою кількох зон",
-            "zh-cn": "支持多个浇水区域 Exp 智能灌溉控制系统"
-        },
-        "authors": [
-            "hualex70 <alexander.huhn@sprint-net.de>"
-        ],
-        "keywords": [
-            "irrigation",
-            "watering",
-            "garden",
-            "valves",
-            "zones",
-            "Bewässerung",
-            "Garten",
-            "Wasser",
-            "Ventile",
-            "Zonen"
-        ],
-        "licenseInformation": {
-            "type": "free",
-            "license": "MIT"
-        },
-        "platform": "Javascript/Node.js",
-        "icon": "simple-irrigation.png",
-        "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/hualex70/ioBroker.simple-irrigation/main/admin/simple-irrigation.png",
-        "readme": "https://github.com/hualex70/ioBroker.simple-irrigation/blob/main/README.md",
-        "loglevel": "info",
-        "tier": 3,
-        "mode": "daemon",
-        "type": "garden",
-        "compact": true,
-        "connectionType": "local",
-        "dataSource": "poll",
-        "adminUI": {
-            "config": "json"
-        },
-        "dependencies": [
-            {
-                "js-controller": ">=6.0.11"
-            }
-        ],
-        "globalDependencies": [
-            {
-                "admin": ">=7.6.20"
-            }
-        ]
+  "common": {
+    "name": "simple-irrigation",
+    "version": "1.0.0",
+    "news": {
+      "1.0.0": {
+        "en": "initial release",
+        "de": "Erstveröffentlichung",
+        "ru": "первоначальный релиз",
+        "pt": "lançamento inicial",
+        "nl": "eerste release",
+        "fr": "version initiale",
+        "it": "rilascio iniziale",
+        "es": "lanzamiento inicial",
+        "pl": "wydanie początkowe",
+        "uk": "початковий випуск",
+        "zh-cn": "初始版本"
+      },
+      "0.0.1": {
+        "en": "initial release",
+        "de": "Erstveröffentlichung",
+        "ru": "Начальная версия",
+        "pt": "lançamento inicial",
+        "nl": "Eerste uitgave",
+        "fr": "Première version",
+        "it": "Versione iniziale",
+        "es": "Versión inicial",
+        "pl": "Pierwsze wydanie",
+        "uk": "Початкова версія",
+        "zh-cn": "首次出版"
+      }
     },
-"native": {
-        "useMasterValve": false,
-        "masterValveStateId": "",
-        "masterValveDelay": 0,
-        "useRainSensor": false,
-        "rainSensorStateId": "",
-        "zones": [
-            {
-                "zoneName": "Zone 1",
-                "valveStateId": "",
-                "duration": 15,
-                "litersPerMin": 10
-            }
-        ]
+    "titleLang": {
+      "en": "simple-irrigation",
+      "de": "simple-irrigation",
+      "ru": "Простой полив",
+      "pt": "Irrigação Simples",
+      "nl": "Eenvoudige irrigatie",
+      "fr": "Irrigation Simple",
+      "it": "Irrigazione Semplice",
+      "es": "Riego Simple",
+      "pl": "Proste nawadnianie",
+      "uk": "Простий полив",
+      "zh-cn": "简易 interpretation 灌溉"
     },
-    "objects": [],
-    "instanceObjects": []
+    "desc": {
+      "en": "Smart irrigation control system supporting multiple watering zones",
+      "de": "Intelligente Bewässerungssteuerung für mehrere Gießzonen",
+      "ru": "Интеллектуальная система управления поливом с поддержкой нескольких зон",
+      "pt": "Sistema inteligente de controle de irrigação com suporte a múltiplas zonas",
+      "nl": "Slim beregeningsbesturingssysteem met ondersteuning voor meerdere zones",
+      "fr": "Système intelligent de contrôle de l'irrigation pour plusieurs zones",
+      "it": "Sistema di controllo intelligente dell'irrigazione con supporto per più zone",
+      "es": "Sistema de control de riego inteligente compatible con múltiples zonas",
+      "pl": "Inteligentny system sterowania nawadnianiem obsługujący wiele stref",
+      "uk": "Інтелектуальна система керування поливом з підтримкою кількох зон",
+      "zh-cn": "支持多个浇水区域 Exp 智能灌溉控制系统"
+    },
+    "authors": [
+      "hualex70 <alexander.huhn@sprint-net.de>"
+    ],
+    "keywords": [
+      "irrigation",
+      "watering",
+      "garden",
+      "valves",
+      "zones",
+      "Bewässerung",
+      "Garten",
+      "Wasser",
+      "Ventile",
+      "Zonen"
+    ],
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    },
+    "platform": "Javascript/Node.js",
+    "icon": "simple-irrigation.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/hualex70/ioBroker.simple-irrigation/main/admin/simple-irrigation.png",
+    "readme": "https://github.com/hualex70/ioBroker.simple-irrigation/blob/main/README.md",
+    "loglevel": "info",
+    "tier": 3,
+    "mode": "daemon",
+    "type": "garden",
+    "compact": true,
+    "connectionType": "local",
+    "dataSource": "poll",
+    "adminUI": {
+      "config": "json"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=6.0.11"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=7.6.20"
+      }
+    ]
+  },
+  "native": {
+    "useMasterValve": false,
+    "masterValveStateId": "",
+    "masterValveDelay": 0,
+    "useRainSensor": false,
+    "rainSensorStateId": "",
+    "zones": [
+      {
+        "zoneName": "Zone 1",
+        "valveStateId": "",
+        "duration": 15,
+        "litersPerMin": 10
+      }
+    ]
+  },
+  "objects": [],
+  "instanceObjects": []
 }

@@ -64,10 +64,8 @@ If an optional main water valve is configured, the following objects are created
 ---
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 1.0.0 (2026-07-10)
 * (hualex70) initial release
-
 
 ### 0.0.1 (2026-07-08)
 * (hualex70) some minor bugfixes 

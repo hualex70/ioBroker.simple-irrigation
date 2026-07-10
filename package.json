@@ -1,6 +1,6 @@
 {
   "name": "iobroker.simple-irrigation",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Bewässerungssteuerung mit Zonen",
   "author": {
     "name": "hualex70",
