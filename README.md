@@ -75,6 +75,8 @@ If an optional main water valve is configured, the following objects are created
 
 ---
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## License
 MIT License
 
