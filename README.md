@@ -64,6 +64,10 @@ If an optional main water valve is configured, the following objects are created
 ---
 
 ## Changelog
+
+### **WORK IN PROGRESS**
+- (ioBroker-Bot) Adapter requires admin >= 7.8.23 now.
+
 ### 1.0.0 (2026-07-10)
 * (hualex70) initial release
 
